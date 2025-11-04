@@ -1,0 +1,7 @@
+{
+  "name": "Generative World Engine local",
+  "description": "An immersive, generative world experience powered by a RAG-based fuzzy logic system and Gemini. Explore dynamic worlds that evolve based on your interest, with features like auto-play Donghua mode, voice interaction, and a real-time debug panel.",
+  "requestFramePermissions": [
+    "microphone"
+  ]
+}
