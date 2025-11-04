@@ -17,8 +17,7 @@ export const aiService = {
     ): Promise<{ worldState: WorldState, actions: PlayerAction[], imageUrl: string, groundingChunks?: any[] }> => {
         switch (model.provider) {
             case ModelProvider.GoogleAI:
-// FIX: Incorrect number of arguments for geminiService.generateWorld. It takes 5, not 7.
-                return geminiService.generateWorld(prompt, language, loreSource, playerRole, model.id);
+                return geminiService.generateWorld(prompt, language, loreSource, playerRole, model.id, apiConfig.googleAIAPIKey);
             case ModelProvider.Ollama:
                 return ollamaService.generateWorld(prompt, language, loreSource, playerRole, model.id, apiConfig, logEvent);
             default:
@@ -36,8 +35,7 @@ export const aiService = {
     ): Promise<{ worldState: WorldState, actions: PlayerAction[], chronicle: string, imageUrl: string, groundingChunks?: any[] }> => {
         switch (model.provider) {
             case ModelProvider.GoogleAI:
-// FIX: Incorrect number of arguments for geminiService.processAction. It takes 4, not 6.
-                return geminiService.processAction(currentWorldState, actionDescription, language, model.id);
+                return geminiService.processAction(currentWorldState, actionDescription, language, model.id, apiConfig.googleAIAPIKey);
             case ModelProvider.Ollama:
                 return ollamaService.processAction(currentWorldState, actionDescription, language, model.id, apiConfig, logEvent);
             default:
@@ -54,8 +52,7 @@ export const aiService = {
     ): Promise<PlayerAction[]> => {
          switch (model.provider) {
             case ModelProvider.GoogleAI:
-// FIX: Incorrect number of arguments for geminiService.clarifyAction. It takes 4, not 5.
-                return geminiService.clarifyAction(currentWorldState, customAction, language, model.id);
+                return geminiService.clarifyAction(currentWorldState, customAction, language, model.id, apiConfig.googleAIAPIKey);
             case ModelProvider.Ollama:
                  return ollamaService.clarifyAction(currentWorldState, customAction, language, model.id, apiConfig);
             default:
@@ -65,31 +62,26 @@ export const aiService = {
 
     detailEntity: async (entity: Entity, worldDescription: string, language: string, model: AIModel, apiConfig: APIConfig): Promise<Entity> => {
         // Use a simpler/faster model for this task regardless of provider
-// FIX: Incorrect number of arguments for geminiService.detailEntity. It takes 3, not 5.
-        return geminiService.detailEntity(entity, worldDescription, language);
+        return geminiService.detailEntity(entity, worldDescription, language, apiConfig.googleAIAPIKey);
     },
 
     rephraseActionAsThought: async (action: string, language: string, model: AIModel, apiConfig: APIConfig): Promise<string> => {
         // Use a simpler/faster model for this task
-// FIX: Incorrect number of arguments for geminiService.rephraseActionAsThought. It takes 2, not 4.
-        return geminiService.rephraseActionAsThought(action, language);
+        return geminiService.rephraseActionAsThought(action, language, apiConfig.googleAIAPIKey);
     },
 
     translateBatch: async (texts: string[], targetLanguage: string, model: AIModel, apiConfig: APIConfig): Promise<string[]> => {
         // Use a simpler/faster model for this task
-// FIX: Incorrect number of arguments for geminiService.translateBatch. It takes 2, not 4.
-        return geminiService.translateBatch(texts, targetLanguage);
+        return geminiService.translateBatch(texts, targetLanguage, apiConfig.googleAIAPIKey);
     },
 
     regenerateImage: async (worldDescription: string, chronicleEntry: string, apiConfig: APIConfig): Promise<string> => {
         // Image generation is specific to Gemini for now
-// FIX: Incorrect number of arguments for geminiService.regenerateImage. It takes 2, not 3.
-        return geminiService.regenerateImage(worldDescription, chronicleEntry);
+        return geminiService.regenerateImage(worldDescription, chronicleEntry, apiConfig.googleAIAPIKey);
     },
 
     textToSpeech: async (text: string, apiConfig: APIConfig): Promise<string> => {
         // TTS is specific to Gemini for now
-// FIX: Incorrect number of arguments for geminiService.textToSpeech. It takes 1, not 2.
-        return geminiService.textToSpeech(text);
+        return geminiService.textToSpeech(text, apiConfig.googleAIAPIKey);
     }
 };

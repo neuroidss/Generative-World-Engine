@@ -1,17 +1,13 @@
-
-
 import { GoogleGenAI, Modality, Type, FunctionDeclaration } from "@google/genai";
 import { v4 as uuidv4 } from 'uuid';
 import type { WorldState, PlayerAction, Entity, Goal, MasterEntity, GMInfo, GeminiSchema } from '../types';
 
-// This would be in a protected environment in a real app
-const API_KEY = process.env.API_KEY;
-if (!API_KEY) {
-  // A real app would have a more sophisticated way of handling this
-  console.warn("API_KEY environment variable not set. Using a placeholder. This will likely fail.");
-}
-
-const ai = new GoogleGenAI({ apiKey: API_KEY });
+const getAiClient = (apiKey?: string) => {
+    if (!apiKey) {
+        throw new Error("Google AI API Key not provided. Please add it in the settings.");
+    }
+    return new GoogleGenAI({ apiKey });
+};
 
 
 // --- Narrative Vector Engine Tools ---
@@ -132,7 +128,6 @@ const actionsSchema = {
     required: ['suggested_actions']
 };
 
-// FIX: Export schemas for use in other services (e.g., ollamaService)
 export const getSchemas = (): GeminiSchema => ({
     createLoreBasedWorldTool,
     updateLoreBasedWorldTool,
@@ -141,8 +136,9 @@ export const getSchemas = (): GeminiSchema => ({
 });
 
 
-const generateWorld = async (prompt: string, language: string = 'en', loreSource?: string, playerRole?: string, model: string = 'gemini-2.5-pro'): Promise<{ worldState: WorldState, actions: PlayerAction[], imageUrl: string, groundingChunks?: any[] }> => {
+const generateWorld = async (prompt: string, language: string = 'en', loreSource?: string, playerRole?: string, model: string = 'gemini-2.5-pro', apiKey?: string): Promise<{ worldState: WorldState, actions: PlayerAction[], imageUrl: string, groundingChunks?: any[] }> => {
     try {
+        const ai = getAiClient(apiKey);
         let worldState: WorldState;
         let actions: PlayerAction[];
         let groundingChunks: any[] = [];
@@ -258,8 +254,9 @@ Call the 'createLoreBasedWorld' function ONCE with all this information. Respond
     }
 };
 
-const processAction = async (currentWorldState: WorldState, actionDescription: string, language: string = 'en', model: string = 'gemini-2.5-pro'): Promise<{ worldState: WorldState, actions: PlayerAction[], chronicle: string, imageUrl: string, groundingChunks?: any[] }> => {
+const processAction = async (currentWorldState: WorldState, actionDescription: string, language: string = 'en', model: string = 'gemini-2.5-pro', apiKey?: string): Promise<{ worldState: WorldState, actions: PlayerAction[], chronicle: string, imageUrl: string, groundingChunks?: any[] }> => {
     try {
+        const ai = getAiClient(apiKey);
         let newWorldState: WorldState;
         let newActions: PlayerAction[];
         let chronicle: string;
@@ -382,9 +379,9 @@ Call the 'updateLoreBasedWorld' function ONCE with the complete new state. All t
     }
 };
 
-// Fix: "Line terminator not permitted before arrow" error by moving `=>` to the same line.
-const detailEntity = async (entity: Entity, worldDescription: string, language: string = 'en'): Promise<Entity> => {
+const detailEntity = async (entity: Entity, worldDescription: string, language: string = 'en', apiKey?: string): Promise<Entity> => {
     try {
+        const ai = getAiClient(apiKey);
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: `The player is showing interest in an entity. Generate a more detailed description of it, including its magical properties, alchemical potential, or history. Keep the response concise and evocative.
@@ -402,8 +399,9 @@ const detailEntity = async (entity: Entity, worldDescription: string, language: 
     }
 }
 
-const clarifyAction = async (currentWorldState: WorldState, customAction: string, language: string = 'en', model: string = 'gemini-2.5-pro'): Promise<PlayerAction[]> => {
+const clarifyAction = async (currentWorldState: WorldState, customAction: string, language: string = 'en', model: string = 'gemini-2.5-pro', apiKey?: string): Promise<PlayerAction[]> => {
     try {
+        const ai = getAiClient(apiKey);
         const prompt = `The player wants to perform a custom action. As the Game Master, interpret their intent and provide a list of concrete, possible actions within the rules of this magical world.
         Current Scene: "${currentWorldState.description}"
         Player's Intent: "${customAction}"
@@ -428,8 +426,9 @@ const clarifyAction = async (currentWorldState: WorldState, customAction: string
     }
 };
 
-const rephraseActionAsThought = async (action: string, language: string = 'en'): Promise<string> => {
+const rephraseActionAsThought = async (action: string, language: string = 'en', apiKey?: string): Promise<string> => {
     try {
+        const ai = getAiClient(apiKey);
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: `Rephrase the following player action as a brief, first-person inner thought of a character in a Donghua (Chinese animation). The character is about to perform this action. Respond in ${language}. IMPORTANT: Your response must contain ONLY the rephrased thought and nothing else. Do not add any introductory text, numbering, or offer multiple options. Action: "${action}"`,
@@ -441,8 +440,9 @@ const rephraseActionAsThought = async (action: string, language: string = 'en'):
     }
 };
 
-const textToSpeech = async (text: string): Promise<string> => {
+const textToSpeech = async (text: string, apiKey?: string): Promise<string> => {
     try {
+        const ai = getAiClient(apiKey);
         const response = await ai.models.generateContent({
             model: "gemini-2.5-flash-preview-tts",
             contents: [{ parts: [{ text }] }],
@@ -466,9 +466,10 @@ const textToSpeech = async (text: string): Promise<string> => {
     }
 }
 
-const translateBatch = async (texts: string[], targetLanguage: string): Promise<string[]> => {
+const translateBatch = async (texts: string[], targetLanguage: string, apiKey?: string): Promise<string[]> => {
     if (!texts || texts.length === 0) return [];
     try {
+        const ai = getAiClient(apiKey);
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
             contents: `Translate the following JSON array of strings to ${targetLanguage}. Maintain the exact JSON array structure and order in your response. Respond ONLY with the translated JSON array.\n\n${JSON.stringify(texts)}`,
@@ -491,8 +492,9 @@ const translateBatch = async (texts: string[], targetLanguage: string): Promise<
     }
 };
 
-const regenerateImage = async (worldDescription: string, chronicleEntry: string): Promise<string> => {
+const regenerateImage = async (worldDescription: string, chronicleEntry: string, apiKey?: string): Promise<string> => {
     try {
+        const ai = getAiClient(apiKey);
         const imageGenResponse = await ai.models.generateContent({
             model: 'gemini-2.5-flash-image',
             contents: { parts: [{ text: `Generate a beautiful, atmospheric image in an artistic style that fits the scene. The scene is: ${worldDescription}. The last thing that happened was: ${chronicleEntry}` }] },

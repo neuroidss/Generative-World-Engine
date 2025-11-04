@@ -1,5 +1,3 @@
-
-
 import { useState, useEffect, useRef, ChangeEvent } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import JSZip from 'jszip';
@@ -297,6 +295,10 @@ export const useGameLogic = () => {
             }
     
         } else if (prompt) {
+            if (selectedModel.provider === ModelProvider.GoogleAI && !apiConfig.googleAIAPIKey) {
+                alert("Please enter your Google AI API Key in the settings (⚙️ icon) first.");
+                return;
+            }
             if (!prompt.trim()) return;
             setGameState('loading');
             const logEvent = (message: string) => updateDebug({ lastApiStatus: message });
