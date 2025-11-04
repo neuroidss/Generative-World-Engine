@@ -2,7 +2,7 @@
 
 An immersive, generative storytelling experience powered by the Google Gemini API. This application allows users to create, explore, and interact with dynamic, AI-generated worlds through a rich, multimedia interface. It's designed as a platform for emergent narratives where the world evolves based on player choices and interests.
 
-![App Screenshot](https://storage.googleapis.com/aistudio-o-backup/project/2a66e60b14b04f76901f681a95447a16/screenshot.png)
+**Live Demo:** [https://neuroidss.github.io/Generative-World-Engine/](https://neuroidss.github.io/Generative-World-Engine/)
 
 ## Core Features
 
